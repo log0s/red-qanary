@@ -98,7 +98,7 @@ except Exception as err:
 # Modify file
 if base_log['logs']['file_create']['error'] is None:
     try:
-        file_modify_cmd = f'echo "This test courtesy of Red QAnary" {">" if is_windows else ">>"} {args.filepath}'
+        file_modify_cmd = f'echo "This test courtesy of Red QAnary"'
         print(f'Modifying file. Command: {file_modify_cmd}')
         base_log['logs']['file_modify'] = {
             'start_time': datetime.datetime.now(),
@@ -109,7 +109,8 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_modify_process = subprocess.Popen(file_modify_cmd if is_windows else shlex.split(file_modify_cmd))
+        output_file = open(args.filepath, 'a')
+        file_modify_process = subprocess.Popen(file_modify_cmd if is_windows else shlex.split(file_modify_cmd), stdout=output_file)
 
         base_log['logs']['file_modify']['process_id'] = file_modify_process.pid
         base_log['logs']['file_modify']['process_name'] = psutil.Process(file_modify_process.pid).name()
