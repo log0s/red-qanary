@@ -84,7 +84,7 @@ try:
         'error': None
     }
 
-    file_create_process = subprocess.Popen(file_create_cmd if is_windows else shlex.split(file_create_cmd))
+    file_create_process = subprocess.Popen(file_create_cmd.split(' ') if is_windows else shlex.split(file_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
@@ -97,7 +97,7 @@ except Exception as err:
 # Modify file
 if base_log['logs']['file_create']['error'] is None:
     try:
-        file_modify_cmd = f'echo "This test courtesy of Red QAnary"'
+        file_modify_cmd = f'cmd /c echo "ThistestcourtesyofRedQAnary" > {args.filepath}' if is_windows else 'echo "This test courtesy of Red QAnary"'
         print(f'Modifying file. Command: {file_modify_cmd}')
         base_log['logs']['file_modify'] = {
             'start_time': datetime.datetime.now(),
@@ -108,8 +108,11 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        output_file = open(args.filepath, 'a')
-        file_modify_process = subprocess.Popen(file_modify_cmd if is_windows else shlex.split(file_modify_cmd), stdout=output_file)
+        if is_windows:
+            file_modify_process = subprocess.Popen(file_modify_cmd.split(' '))
+        else:
+            output_file = open(args.filepath, 'a')
+            file_modify_process = subprocess.Popen(shlex.split(file_modify_cmd), stdout=output_file)
 
         base_log['logs']['file_modify']['process_id'] = file_modify_process.pid
         base_log['logs']['file_modify']['process_name'] = psutil.Process(file_modify_process.pid).name()
@@ -131,9 +134,9 @@ if base_log['logs']['file_create']['error'] is None:
     try:
         # Clean up dirs as well if necessary
         if filepath_includes_dirs:
-            file_delete_cmd = f'rd /s /q {split_filepath[0]}' if is_windows else f'rm -rf {split_filepath[1]}'
+            file_delete_cmd = f'cmd /c rd /s /q {split_filepath[0]}' if is_windows else f'rm -rf {split_filepath[1]}'
         else:
-            file_delete_cmd = f'del /q {args.filepath}' if is_windows else f'rm -f {args.filepath}'
+            file_delete_cmd = f'cmd /c del /q {args.filepath}' if is_windows else f'rm -f {args.filepath}'
 
         print(f'Deleting file. Command: {file_delete_cmd}')
         base_log['logs']['file_delete'] = {
@@ -145,7 +148,7 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_delete_process = subprocess.Popen(file_delete_cmd if is_windows else shlex.split(file_delete_cmd))
+        file_delete_process = subprocess.Popen(file_delete_cmd.split(' ') if is_windows else shlex.split(file_delete_cmd))
 
         base_log['logs']['file_delete']['process_id'] = file_delete_process.pid
         base_log['logs']['file_delete']['process_name'] = psutil.Process(file_delete_process.pid).name()
