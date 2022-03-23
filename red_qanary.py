@@ -33,16 +33,16 @@ base_log = {
 
 parser = argparse.ArgumentParser('Red QAnary');
 
-parser.add_argument('executable', type=str, help='path to the executable to be run')
+parser.add_argument('-e', '--exe', type=str, default='rundll32' if is_windows else './default_exec.sh', help='OPTIONAL - path to the executable to be run')
 parser.add_argument('-a', '--args', type=str, dest='exeargs', default='', help='OPTIONAL - arguments to pass when running the executable')
-parser.add_argument('-f', '--filepath', type=str, default=f'{"" if is_windows else "./"}redQAnary.json', help='OPTIONAL - path (including name) of the temporary file to be created')
+parser.add_argument('-f', '--filepath', type=str, default=f'{"" if is_windows else "./"}red_qanary.txt', help='OPTIONAL - path (including name) of the temporary file to be created')
 parser.add_argument('-u', '--url', type=str, default='http://www.redcanary.com', help='OPTIONAL - external endpoint to make a GET request to')
 
 args = parser.parse_args()
 
 # Run executable
 try:
-    exe_cmd = ' '.join([args.executable, args.exeargs])
+    exe_cmd = ' '.join([args.exe, args.exeargs])
     print(f'Running executable. Command: {exe_cmd}')
     base_log['logs']['exe_run'] = {
         'start_time': datetime.datetime.now(),
