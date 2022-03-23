@@ -50,10 +50,12 @@ try:
         'error': None
     }
 
-    exe_process = subprocess.Popen(exe_cmd, shell=True)
+    exe_process = subprocess.check_output(exe_cmd, shell=True)
 
     base_log['logs']['exe_run']['process_id'] = exe_process.pid
     base_log['logs']['exe_run']['process_name'] = psutil.Process(exe_process.pid).name()
+
+    exe_process.wait()
 except Exception as err:
     print(f'ERROR - Error running executable. Details: {err}')
     base_log['logs']['exe_run']['error'] = err
@@ -68,13 +70,13 @@ try:
 
     # Create dirs first if necessary
     if filepath_includes_dirs and is_windows:
-        dir_create_cmd = f'mkdir {split_filepath[:-1]}'
+        dir_create_cmd = f'mkdir {"/".join(split_filepath[:-1])}'
     elif filepath_includes_dirs:
-        dir_create_cmd = f'mkdir -p {split_filepath[1:-1]}'  
+        dir_create_cmd = f'mkdir -p {"/".join(split_filepath[1:-1])}'  
     else:
         dir_create_cmd = None
 
-    full_create_cmd = (' && ').join([dir_create_cmd, file_create_cmd]) if dir_create_cmd is not None else file_create_cmd
+    full_create_cmd = ' && '.join([dir_create_cmd, file_create_cmd]) if dir_create_cmd is not None else file_create_cmd
 
     print(f'Creating file. Command: {full_create_cmd}')
     base_log['logs']['file_create'] = {
@@ -90,6 +92,8 @@ try:
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
+
+    file_create_process.wait()
 except Exception as err:
     print(f'ERROR - Error creating file. Details: {err}')
     base_log['logs']['file_create']['error'] = err
@@ -112,6 +116,8 @@ if base_log['logs']['file_create']['error'] is None:
 
         base_log['logs']['file_modify']['process_id'] = file_modify_process.pid
         base_log['logs']['file_modify']['process_name'] = psutil.Process(file_modify_process.pid).name()
+
+        file_modify_process.wait()
     except Exception as err:
         print(f'ERROR - Error modifying file. Details: {err}')
         base_log['logs']['file_modify']['error'] = err
@@ -146,6 +152,8 @@ if base_log['logs']['file_create']['error'] is None:
 
         base_log['logs']['file_delete']['process_id'] = file_delete_process.pid
         base_log['logs']['file_delete']['process_name'] = psutil.Process(file_delete_process.pid).name()
+
+        file_delete_process.wait()
     except Exception as err:
         print(f'ERROR - Error deleting file. Details: {err}')
         base_log['logs']['file_delete']['error'] = err
@@ -171,25 +179,20 @@ try:
     }
 
     network_request_process = subprocess.Popen(network_request_cmd, shell=True, stdout=subprocess.PIPE)
-    # Pull the process info (specifically name) here since communicate() will kill it
-    process_info = {
-        'process_id': network_request_process.pid,
-        'process_name': psutil.Process(network_request_process.pid).name()
-    }
+
+    base_log['logs']['network_request']['process_id'] = network_request_process.pid
+    base_log['logs']['network_request']['process_name'] = psutil.Process(network_request_process.pid).name()
 
     (res, err) = network_request_process.communicate()
+
+    if err is not None:
+        raise Exception(err)
+
     res_params = res.decode('utf-8').split(',')
 
-    base_log['logs']['network_request'] = {
-        **base_log['logs']['network_request'],
-        **{
-            **process_info,
-            'source_address': res_params[0],
-            'destination_address': res_params[1],
-            'data_sent_size': res_params[2]
-        }
-    }
-    
+    base_log['logs']['network_request']['source_address'] = res_params[0]
+    base_log['logs']['network_request']['destination_address'] = res_params[1]
+    base_log['logs']['network_request']['data_sent_size'] = res_params[2]
 except Exception as err:
     print(f'ERROR - Error making network request. Details: {err}')
     base_log['logs']['network_request']['error'] = err
