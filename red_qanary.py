@@ -9,11 +9,7 @@ import psutil
 import json
 import shlex
 
-system_platform = platform.system()
-
-is_mac = system_platform == 'Darwin'
-is_linux = system_platform == 'Linux'
-is_windows = system_platform == 'Windows'
+is_windows = platform.system() == 'Windows'
 
 # Use the getpwuid solution on Unix-like systems to properly handle the sudo case
 username = getpass.getuser() if is_windows else pwd.getpwuid(os.getuid()).pw_name
