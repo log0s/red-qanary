@@ -89,6 +89,7 @@ try:
         'error': None
     }
 
+    # FIXME - Right now this is broken in Windows, likely due to how it parses, escapes, and re-joins the commands. Need to find a way around this
     file_create_process = subprocess.Popen(full_create_cmd if is_windows else shlex.split(full_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
