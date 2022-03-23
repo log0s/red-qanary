@@ -70,27 +70,22 @@ try:
     file_create_cmd = f'{"type NUL >" if is_windows else "touch"} {args.filepath}'
 
     # Create dirs first if necessary
-    if filepath_includes_dirs and is_windows:
-        dir_create_cmd = f'mkdir {"/".join(split_filepath[:-1])}'
-    elif filepath_includes_dirs:
-        dir_create_cmd = f'mkdir -p {"/".join(split_filepath[1:-1])}'  
-    else:
-        dir_create_cmd = None
+    if filepath_includes_dirs:
+        dir_create_cmd = f'mkdir {"/".join(split_filepath[:-1])}' if is_windows else f'mkdir -p {"/".join(split_filepath[1:-1])}'
+        subprocess.check_call(dir_create_cmd if is_windows else shlex.split(dir_create_cmd))
 
-    full_create_cmd = ' && '.join([dir_create_cmd, file_create_cmd]) if dir_create_cmd is not None else file_create_cmd
-
-    print(f'Creating file. Command: {full_create_cmd}')
+    print(f'Creating file. Command: {file_create_cmd}')
     base_log['logs']['file_create'] = {
         'start_time': datetime.datetime.now(),
         'username': username,
         'file_path': args.filepath,
         'action_type': 'create',
-        'process_command': full_create_cmd,
+        'process_command': file_create_cmd,
         'error': None
     }
 
-    # FIXME - Right now this is broken in Windows, likely due to how it parses, escapes, and re-joins the commands. Need to find a way around this
-    file_create_process = subprocess.Popen(full_create_cmd if is_windows else shlex.split(full_create_cmd))
+    # FIXME - Right now this is broken in Windows, likely due to how it parses, escapes, and re-joins the commands. Need to find a way around this as it breaks all file activities
+    file_create_process = subprocess.Popen(file_create_cmd if is_windows else shlex.split(file_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
