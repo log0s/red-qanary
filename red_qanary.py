@@ -51,7 +51,7 @@ try:
         'error': None
     }
 
-    exe_process = subprocess.Popen(shlex.split(exe_cmd))
+    exe_process = subprocess.Popen(exe_cmd if is_windows else shlex.split(exe_cmd))
 
     base_log['logs']['exe_run']['process_id'] = exe_process.pid
     base_log['logs']['exe_run']['process_name'] = psutil.Process(exe_process.pid).name()
@@ -89,7 +89,7 @@ try:
         'error': None
     }
 
-    file_create_process = subprocess.Popen(shlex.split(full_create_cmd))
+    file_create_process = subprocess.Popen(full_create_cmd if is_windows else shlex.split(full_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
@@ -113,7 +113,7 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_modify_process = subprocess.Popen(shlex.split(file_modify_cmd))
+        file_modify_process = subprocess.Popen(file_modify_cmd if is_windows else shlex.split(file_modify_cmd))
 
         base_log['logs']['file_modify']['process_id'] = file_modify_process.pid
         base_log['logs']['file_modify']['process_name'] = psutil.Process(file_modify_process.pid).name()
@@ -149,7 +149,7 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_delete_process = subprocess.Popen(shlex.split(file_delete_cmd))
+        file_delete_process = subprocess.Popen(file_delete_cmd if is_windows else shlex.split(file_delete_cmd))
 
         base_log['logs']['file_delete']['process_id'] = file_delete_process.pid
         base_log['logs']['file_delete']['process_name'] = psutil.Process(file_delete_process.pid).name()
@@ -179,7 +179,7 @@ try:
         'error': None
     }
 
-    network_request_process = subprocess.Popen(shlex.split(network_request_cmd), stdout=subprocess.PIPE)
+    network_request_process = subprocess.Popen(network_request_cmd if is_windows else shlex.split(network_request_cmd), stdout=subprocess.PIPE)
 
     base_log['logs']['network_request']['process_id'] = network_request_process.pid
     base_log['logs']['network_request']['process_name'] = psutil.Process(network_request_process.pid).name()
