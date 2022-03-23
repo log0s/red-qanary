@@ -71,8 +71,8 @@ try:
 
     # Create dirs first if necessary
     if filepath_includes_dirs:
-        dir_create_cmd = f'mkdir {"/".join(split_filepath[:-1])}' if is_windows else f'mkdir -p {"/".join(split_filepath[1:-1])}'
-        subprocess.check_call(dir_create_cmd if is_windows else shlex.split(dir_create_cmd))
+        dir_create_cmd = f'cmd /c mkdir {"/".join(split_filepath[:-1])}' if is_windows else f'mkdir -p {"/".join(split_filepath[1:-1])}'
+        subprocess.check_call(dir_create_cmd.split(' ') if is_windows else shlex.split(dir_create_cmd))
 
     print(f'Creating file. Command: {file_create_cmd}')
     base_log['logs']['file_create'] = {
