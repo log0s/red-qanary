@@ -67,7 +67,7 @@ filepath_includes_dirs = len(split_filepath) > 2 or (is_windows and len(split_fi
 
 # Create file
 try:
-    file_create_cmd = f'{"type NUL >" if is_windows else "touch"} {args.filepath}'
+    file_create_cmd = 'type NUL' if is_windows else f'touch {args.filepath}'
 
     # Create dirs first if necessary
     if filepath_includes_dirs:
@@ -84,8 +84,11 @@ try:
         'error': None
     }
 
-    # FIXME - Right now this is broken in Windows, likely due to how it parses, escapes, and re-joins the commands. Need to find a way around this as it breaks all file activities
-    file_create_process = subprocess.Popen(file_create_cmd if is_windows else shlex.split(file_create_cmd))
+    if is_windows:
+        create_file = open(args.filepath, 'w')
+        file_create_process = subprocess.Popen(file_create_cmd, stdout=create_file)
+    else:
+        file_create_process = subprocess.Popen(shlex.split(file_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
