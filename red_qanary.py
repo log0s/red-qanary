@@ -1,5 +1,4 @@
 import os
-import pwd
 import argparse
 import platform
 import getpass
@@ -12,7 +11,12 @@ import shlex
 is_windows = platform.system() == 'Windows'
 
 # Use the getpwuid solution on Unix-like systems to properly handle the sudo case
-username = getpass.getuser() if is_windows else pwd.getpwuid(os.getuid()).pw_name
+if is_windows:
+    username = getpass.getuser()
+else:
+    # pwd doesn't exist on Windows so we need to conditionally import it
+    import pwd
+    username = pwd.getpwuid(os.getuid()).pw_name
 
 base_log = {
     'start_time': datetime.datetime.now(),
@@ -63,7 +67,7 @@ filepath_includes_dirs = len(split_filepath) > 2 or (is_windows and len(split_fi
 
 # Create file
 try:
-    file_create_cmd = f'{"copy NUL" if is_windows else "touch"} {args.filepath}'
+    file_create_cmd = f'{"type NUL >" if is_windows else "touch"} {args.filepath}'
 
     # Create dirs first if necessary
     if filepath_includes_dirs and is_windows:
