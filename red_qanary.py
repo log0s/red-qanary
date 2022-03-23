@@ -7,6 +7,7 @@ import datetime
 import subprocess
 import psutil
 import json
+import shlex
 
 system_platform = platform.system()
 
@@ -50,7 +51,7 @@ try:
         'error': None
     }
 
-    exe_process = subprocess.check_output(exe_cmd, shell=True)
+    exe_process = subprocess.Popen(shlex.split(exe_cmd))
 
     base_log['logs']['exe_run']['process_id'] = exe_process.pid
     base_log['logs']['exe_run']['process_name'] = psutil.Process(exe_process.pid).name()
@@ -88,7 +89,7 @@ try:
         'error': None
     }
 
-    file_create_process = subprocess.Popen(full_create_cmd, shell=True)
+    file_create_process = subprocess.Popen(shlex.split(full_create_cmd))
 
     base_log['logs']['file_create']['process_id'] = file_create_process.pid
     base_log['logs']['file_create']['process_name'] = psutil.Process(file_create_process.pid).name()
@@ -112,7 +113,7 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_modify_process = subprocess.Popen(file_modify_cmd, shell=True)
+        file_modify_process = subprocess.Popen(shlex.split(file_modify_cmd))
 
         base_log['logs']['file_modify']['process_id'] = file_modify_process.pid
         base_log['logs']['file_modify']['process_name'] = psutil.Process(file_modify_process.pid).name()
@@ -148,7 +149,7 @@ if base_log['logs']['file_create']['error'] is None:
             'error': None
         }
 
-        file_delete_process = subprocess.Popen(file_delete_cmd, shell=True)
+        file_delete_process = subprocess.Popen(shlex.split(file_delete_cmd))
 
         base_log['logs']['file_delete']['process_id'] = file_delete_process.pid
         base_log['logs']['file_delete']['process_name'] = psutil.Process(file_delete_process.pid).name()
@@ -178,16 +179,12 @@ try:
         'error': None
     }
 
-    network_request_process = subprocess.Popen(network_request_cmd, shell=True, stdout=subprocess.PIPE)
+    network_request_process = subprocess.Popen(shlex.split(network_request_cmd), stdout=subprocess.PIPE)
 
     base_log['logs']['network_request']['process_id'] = network_request_process.pid
     base_log['logs']['network_request']['process_name'] = psutil.Process(network_request_process.pid).name()
 
     (res, err) = network_request_process.communicate()
-
-    if err is not None:
-        raise Exception(err)
-
     res_params = res.decode('utf-8').split(',')
 
     base_log['logs']['network_request']['source_address'] = res_params[0]
@@ -200,3 +197,4 @@ except Exception as err:
 with open('red_qanary_logs.json', 'w') as f:
     print('Creating log file')
     json.dump(base_log, f, indent=4, default=str)
+    print(f'Log file created at {"./" if not is_windows else ""}red_qanary_logs.json')
