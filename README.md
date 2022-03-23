@@ -4,6 +4,9 @@ Red QAnary - Tool to generate activity for testing/QAing EDR frameworks.
 ## Dependencies
 `sudo pip install psutil`
 
+If you want to utilize the included shell script on a Mac/Linux system you'll need to make it executable:
+`chmod +x ./default_exec.sh`
+
 ## Usage
 ```
 python red_qanary.py [-h] [-e EXE] [-a EXEARGS] [-f FILEPATH] [-u URL]
