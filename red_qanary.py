@@ -167,14 +167,14 @@ else:
 
 # Make network request
 try:
-    network_request_cmd = f'curl -o {"nul" if is_windows else "/dev/null"} -w "%{{local_ip}}:%{{local_port}},%{{remote_ip}}:%{{remote_port}},%{{size_request}}" http://www.redcanary.com'
+    network_request_cmd = f'curl -o {"nul" if is_windows else "/dev/null"} -w "%{{local_ip}}:%{{local_port}},%{{remote_ip}}:%{{remote_port}},%{{size_request}}" {args.url}'
 
     print(f'Making network request. Command: {network_request_cmd}')
     base_log['logs']['network_request'] = {
         'start_time': datetime.datetime.now(),
         'username': username,
         'process_command': network_request_cmd,
-        'protocol': 'HTTP',
+        'protocol': args.url.split(':/')[0],
         'error': None
     }
 
